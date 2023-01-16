@@ -34,5 +34,6 @@ runs:
       name: Add outputs
       shell: bash
       run: |
-        echo "container-registry-url=${{ inputs.host }}:${{ inputs.port }}" >> $GITHUB_OUTPUT
-        echo "CONTAINER_REGISTRY_URL=container-registry.org:5000" >> $GITHUB_ENV
+        URL=${{ inputs.host }}:${{ inputs.port }}
+        echo "container-registry-url=$URL" >> $GITHUB_OUTPUT
+        echo "CONTAINER_REGISTRY_URL=$URL" >> $GITHUB_ENV

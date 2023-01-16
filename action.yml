@@ -17,12 +17,14 @@ runs:
   using: "composite"
   steps:
     - name: Configure Registry
+      shell: bash
       run: |
         mkdir ~/registry
         cd ~/registry
         mkdir data
         docker run -d --restart unless-stopped --network host -e REGISTRY_HTTP_ADDR=0.0.0.0:${{ inputs.port }} -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v $PWD/data:/data registry:2
     - name: Add host
+      shell: bash
       run: |
         cp /etc/hosts local_hosts
         echo '127.0.0.1 ${{ inputs.host }}' >> local_hosts
@@ -30,6 +32,7 @@ runs:
         sudo cp local_hosts /etc/hosts
     - id: add-outputs
       name: Add outputs
+      shell: bash
       run: |
         echo "container-registry-url=${{ inputs.host }}:${{ inputs.port }}" >> $GITHUB_OUTPUT
         echo "CONTAINER_REGISTRY_URL=container-registry.org:5000" >> $GITHUB_ENV

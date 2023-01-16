@@ -1,0 +1,13 @@
+on: [push]
+jobs:
+  simple:
+    name: Simple Workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Sgitario/setup-container-registry@v0.1
+      - name: Test Using Env Var
+        run: |
+          docker pull hello-world:latest
+          docker tag hello-world:latest $CONTAINER_REGISTRY_URL/test/image:version
+          docker push $CONTAINER_REGISTRY_URL/test/image:version
+          docker run $CONTAINER_REGISTRY_URL/test/image:version

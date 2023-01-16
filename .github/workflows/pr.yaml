@@ -1,0 +1,30 @@
+name: "Build"
+on:
+  - pull_request
+  - push
+jobs:
+  linux-jvm-ocp:
+    name: PR - Linux - JVM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure Registry
+        run: |
+          mkdir ~/registry
+          cd ~/registry
+          mkdir data
+          docker run -d --network host -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v $PWD/data:/data registry:2
+      - name: Add host
+        run: |
+          cp /etc/hosts local_hosts
+          echo '127.0.0.1 container-registry.org' >> local_hosts
+          cat local_hosts
+          sudo cp local_hosts /etc/hosts
+
+      - name: Test
+        run: |
+          CONTAINER_REGISTRY_URL=container-registry.org:5000
+          docker pull hello-world:latest
+          docker tag hello-world:latest $CONTAINER_REGISTRY_URL/test/image:version
+          docker push $CONTAINER_REGISTRY_URL/test/image:version
+          docker run $CONTAINER_REGISTRY_URL/test/image:version

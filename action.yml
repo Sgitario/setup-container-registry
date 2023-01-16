@@ -1,0 +1,35 @@
+name: 'Setup Container Registry'
+description: 'Setup a container registry for your GitHub action which can be used to pull/push your container images'
+inputs:
+  host:
+    description: 'The host of the container registry that will be launched'
+    required: false
+    default: 'container-registry.org'
+  port:
+    description: 'The port of the container registry that will be launched'
+    required: false
+    default: 5000
+outputs:
+  container-registry-url:
+    description: "The generated container registry URL"
+    value: ${{ steps.add-outputs.outputs.container-registry-url }}
+runs:
+  using: "composite"
+  steps:
+    - name: Configure Registry
+      run: |
+        mkdir ~/registry
+        cd ~/registry
+        mkdir data
+        docker run -d --restart unless-stopped --network host -e REGISTRY_HTTP_ADDR=0.0.0.0:${{ inputs.port }} -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v $PWD/data:/data registry:2
+    - name: Add host
+      run: |
+        cp /etc/hosts local_hosts
+        echo '127.0.0.1 ${{ inputs.host }}' >> local_hosts
+        cat local_hosts
+        sudo cp local_hosts /etc/hosts
+    - id: add-outputs
+      name: Add outputs
+      run: |
+        echo "container-registry-url=${{ inputs.host }}:${{ inputs.port }}" >> $GITHUB_OUTPUT
+        echo "CONTAINER_REGISTRY_URL=container-registry.org:5000" >> $GITHUB_ENV
